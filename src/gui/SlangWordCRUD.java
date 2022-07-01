@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
+import utils.SlangWordUtils;
 
 /**
  *
@@ -150,6 +151,7 @@ public class SlangWordCRUD extends JFrame{
         EventQueue.invokeLater(() -> {
             SlangWordCRUD window = new SlangWordCRUD();
             window.setVisible(true);
+            SlangWordUtils.getAllWords();
         });
     }
 }
