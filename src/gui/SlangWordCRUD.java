@@ -21,6 +21,9 @@ public class SlangWordCRUD extends JFrame{
     private static JPanel sidePane;
     private static JPanel leftPane;
     private static JPanel searchPane;
+    private static JRadioButton searchByWordRadioButton;
+    private static JRadioButton searchByDefinitionRadioButton;
+    private static ButtonGroup searchOptionButtonGroup;
     private static JTextField searchTextField;
     private static JButton searchButton;
     private static JScrollPane wordListPane;
@@ -93,17 +96,32 @@ public class SlangWordCRUD extends JFrame{
         //set search button
         searchButton = new JButton("Search");
         
+        //set search option
+        searchByWordRadioButton = new JRadioButton("Search by word");
+        searchByDefinitionRadioButton = new JRadioButton("Search by definition");
+        searchOptionButtonGroup = new ButtonGroup();
+        searchOptionButtonGroup.add(searchByWordRadioButton);
+        searchOptionButtonGroup.add(searchByDefinitionRadioButton);
+        
         //set search pane
         searchPane = new JPanel();
         searchPane.setLayout(new GridBagLayout());
         GridBagConstraints c;
         c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.WEST;
         c.gridy = 0;
+        c.gridx = 0;
+        searchPane.add(searchByWordRadioButton, c);
+        c.gridy = 1;
+        searchPane.add(searchByDefinitionRadioButton, c);
+        c = new GridBagConstraints();
+        c.gridy = 2;
         c.gridx = 0;
         c.weightx = 1.0; //take all extra space
         c.fill = GridBagConstraints.BOTH; //fill all the space
         searchPane.add(searchTextField, c);
         c = new GridBagConstraints();
+        c.gridy = 2;
         c.gridx = 1;
         c.gridwidth = 1;
         searchPane.add(searchButton, c);
@@ -121,7 +139,7 @@ public class SlangWordCRUD extends JFrame{
         
         //set the left pane
         leftPane = new JPanel();
-        leftPane.setPreferredSize(new Dimension(200, -1));
+        leftPane.setPreferredSize(new Dimension(250, -1));
         leftPane.setLayout(new BorderLayout());
         leftPane.add(searchPane, BorderLayout.NORTH);
         leftPane.add(wordListPane, BorderLayout.CENTER);
@@ -151,7 +169,6 @@ public class SlangWordCRUD extends JFrame{
         EventQueue.invokeLater(() -> {
             SlangWordCRUD window = new SlangWordCRUD();
             window.setVisible(true);
-            SlangWordUtils.getAllWords();
         });
     }
 }
