@@ -26,6 +26,17 @@ public class SlangWordUtils {
         return wordListTM;
     }
     
+    public static SlangWord searchByWord(String searchString){
+        searchString = searchString.toUpperCase();
+        if(wordListTM.containsKey(searchString)){
+            SlangWord result = new SlangWord();
+            result.setWord(searchString);
+            result.setDefinitionList(wordListTM.get(searchString));
+            return result;
+        }
+        return null;
+    }
+    
     private static void loadAllWords(){
         TreeMap<String, String[]> wordList = new TreeMap<>();
         try (BufferedReader reader = new BufferedReader (new FileReader(FILE_PATH))){
@@ -55,17 +66,20 @@ public class SlangWordUtils {
     
     public static String convertWordToHtml(SlangWord word){
         StringBuilder htmlContent = new StringBuilder();
-        htmlContent.append("<html>")
-            .append("<body>")
-            .append("<h2>").append(word.getWord()).append("</h2>")
-            .append("<ul>");
-        for(String def: word.getDefinitionList()){
-            htmlContent.append("<li>").append(def).append("</li>");
+        if(word != null){
+            htmlContent.append("<html>")
+                .append("<body>")
+                .append("<h2>").append(word.getWord()).append("</h2>")
+                .append("<ul>");
+            for(String def: word.getDefinitionList()){
+                htmlContent.append("<li>").append(def).append("</li>");
+            }
+            htmlContent.append("</ul>")
+                .append("</body>")
+                .append("</html>");
+            return htmlContent.toString();
         }
-        htmlContent.append("</ul>")
-            .append("</body>")
-            .append("</html>");
-        return htmlContent.toString();
+        return null;
     }
     
     public static void printAllWords(TreeMap<String, String[]> wordList) {

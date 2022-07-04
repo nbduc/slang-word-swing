@@ -6,6 +6,7 @@
 package gui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -57,6 +58,39 @@ public class SlangWordCRUD extends JFrame{
             SlangWord selectedWord = (SlangWord)wordListContainer.getSelectedValue();
             definitionEditorPane.setText(SlangWordUtils.convertWordToHtml(selectedWord));
         });
+    }
+    
+    private String NoDataHtmlContent(){
+        StringBuilder htmlContent = new StringBuilder();
+        htmlContent.append("<html>")
+                .append("<i style=\"color: red;\">")
+                .append("Cannot find that word!")
+                .append("</i>")
+                .append("</html>");
+        return htmlContent.toString();
+    }
+    
+    private void search(){
+        String searchString = searchTextField.getText();
+        if(!"".equals(searchString)){
+            wordListContainer.clearSelection();
+            SlangWord searchResult = SlangWordUtils.searchByWord(searchString);
+            if(searchResult != null){
+                definitionEditorPane.setText(SlangWordUtils.convertWordToHtml(searchResult));
+            } else {
+                definitionEditorPane.setText(NoDataHtmlContent());
+            }
+        }
+    }
+    
+    private void initSearchTextField() {
+        searchTextField = new JTextField();
+        searchTextField.addActionListener((ActionEvent e) -> search());
+    }
+    
+    private void initSearchButton(){
+        searchButton = new JButton("Search");
+        searchButton.addActionListener((ActionEvent e) -> search());
     }
     
     private void createAndShowGUI() {
@@ -116,10 +150,10 @@ public class SlangWordCRUD extends JFrame{
         setJMenuBar(menubar);
         
         //set search text field
-        searchTextField = new JTextField();
+        initSearchTextField();
         
         //set search button
-        searchButton = new JButton("Search");
+        initSearchButton();
         
         //set search option
         searchByWordRadioButton = new JRadioButton("Search by word");
