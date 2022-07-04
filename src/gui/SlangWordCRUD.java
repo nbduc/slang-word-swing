@@ -70,7 +70,7 @@ public class SlangWordCRUD extends JFrame{
         return htmlContent.toString();
     }
     
-    private void search(){
+    private void searchAndDisplayResult(){
         String searchString = searchTextField.getText();
         if(!"".equals(searchString)){
             wordListContainer.clearSelection();
@@ -81,16 +81,6 @@ public class SlangWordCRUD extends JFrame{
                 definitionEditorPane.setText(NoDataHtmlContent());
             }
         }
-    }
-    
-    private void initSearchTextField() {
-        searchTextField = new JTextField();
-        searchTextField.addActionListener((ActionEvent e) -> search());
-    }
-    
-    private void initSearchButton(){
-        searchButton = new JButton("Search");
-        searchButton.addActionListener((ActionEvent e) -> search());
     }
     
     private void createAndShowGUI() {
@@ -136,6 +126,10 @@ public class SlangWordCRUD extends JFrame{
         quizMenu.setMnemonic(KeyEvent.VK_Q);
         
         JMenuItem guessWordItem = new JMenuItem("Guess the Word!...");
+        guessWordItem.addActionListener((ActionEvent e) -> {
+            GuessTheWord guessTheWordFrame = new GuessTheWord();
+            guessTheWordFrame.setVisible(true);
+        });
         JMenuItem guessDefItem = new JMenuItem("Guess the Definition!...");
         
         quizMenu.add(guessWordItem);
@@ -150,10 +144,12 @@ public class SlangWordCRUD extends JFrame{
         setJMenuBar(menubar);
         
         //set search text field
-        initSearchTextField();
+        searchTextField = new JTextField();
+        searchTextField.addActionListener((ActionEvent e) -> searchAndDisplayResult());
         
         //set search button
-        initSearchButton();
+        searchButton = new JButton("Search");
+        searchButton.addActionListener((ActionEvent e) -> searchAndDisplayResult());
         
         //set search option
         searchByWordRadioButton = new JRadioButton("Search by word");

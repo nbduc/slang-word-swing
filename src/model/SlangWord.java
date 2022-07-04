@@ -12,6 +12,13 @@ package model;
 public class SlangWord {
     private String word;
     private String[] definitionList;
+    
+    public SlangWord(){}
+    
+    public SlangWord(String word, String[] definitionList){
+        this.word = word;
+        this.definitionList = definitionList;
+    }
 
     /**
      * @return the word

@@ -7,7 +7,9 @@ package utils;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.TreeMap;
 import model.SlangWord;
 
@@ -29,9 +31,7 @@ public class SlangWordUtils {
     public static SlangWord searchByWord(String searchString){
         searchString = searchString.toUpperCase();
         if(wordListTM.containsKey(searchString)){
-            SlangWord result = new SlangWord();
-            result.setWord(searchString);
-            result.setDefinitionList(wordListTM.get(searchString));
+            SlangWord result = new SlangWord(searchString, wordListTM.get(searchString));
             return result;
         }
         return null;
@@ -89,5 +89,17 @@ public class SlangWordUtils {
 
             System.out.println(word + " => " + Arrays.toString(defs));
         });
+    }
+    
+    public static ArrayList<SlangWord> random4SlangWord() {
+        ArrayList<SlangWord> wordListResult = new ArrayList<>();
+        
+        Random random = new Random();
+        ArrayList<String> wordList = new ArrayList<>(wordListTM.keySet());
+        for(int i = 0; i < 4; i++){
+            String randomWord = wordList.get(random.nextInt(wordList.size()));
+            wordListResult.add(new SlangWord(randomWord, wordListTM.get(randomWord)));
+        }
+        return wordListResult;
     }
 }
