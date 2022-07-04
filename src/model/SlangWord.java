@@ -40,4 +40,8 @@ public class SlangWord {
     public void setDefinitionList(String[] definitionList) {
         this.definitionList = definitionList;
     }
+    
+    public String toString(){
+        return word;
+    }
 }

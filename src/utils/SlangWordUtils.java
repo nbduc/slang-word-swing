@@ -4,12 +4,10 @@
  * and open the template in the editor.
  */
 package utils;
-import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.TreeMap;
 import model.SlangWord;
 
@@ -19,8 +17,16 @@ import model.SlangWord;
  */
 public class SlangWordUtils {
     private static final String FILE_PATH = "slang.txt";
+    private static TreeMap<String, String[]> wordListTM;
     
-    public static TreeMap<String, String[]> getAllWords(){
+    public static TreeMap<String, String[]> getWordListTM(){
+        if(wordListTM == null){
+            loadAllWords();
+        }
+        return wordListTM;
+    }
+    
+    private static void loadAllWords(){
         TreeMap<String, String[]> wordList = new TreeMap<>();
         try (BufferedReader reader = new BufferedReader (new FileReader(FILE_PATH))){
             //get header
@@ -30,32 +36,35 @@ public class SlangWordUtils {
             //get wordList
             line = reader.readLine();
             while (line != null) {
-                SlangWord word = new SlangWord();
-                
                 String[] parts = line.split("`");
-                word.setWord(parts[0]);
-                word.setDefinitionList(parts[1].split("| "));
                 
-                if(!wordList.containsKey(word.getWord())){
-                    wordList.put(word.getWord(), word.getDefinitionList());
+                if(!wordList.containsKey(parts[0])){
+                    if(parts.length > 1){
+                        wordList.put(parts[0], parts[1].split("\\| "));
+                    } else {
+                        wordList.put(parts[0], null);
+                    }
                 }
-                
                 line = reader.readLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return wordList;
+        wordListTM = wordList;
     }
     
-    public static String convertWordToHtml(String[] defs){
+    public static String convertWordToHtml(SlangWord word){
         StringBuilder htmlContent = new StringBuilder();
-        for(String def: defs){
-            htmlContent.append("<html>");
-            htmlContent.append(def);
-            htmlContent.append("");
-            htmlContent.append("</html>");
+        htmlContent.append("<html>")
+            .append("<body>")
+            .append("<h2>").append(word.getWord()).append("</h2>")
+            .append("<ul>");
+        for(String def: word.getDefinitionList()){
+            htmlContent.append("<li>").append(def).append("</li>");
         }
+        htmlContent.append("</ul>")
+            .append("</body>")
+            .append("</html>");
         return htmlContent.toString();
     }
     

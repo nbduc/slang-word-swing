@@ -6,9 +6,12 @@
 package gui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.TreeMap;
+import java.util.Vector;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import model.SlangWord;
 import utils.SlangWordUtils;
 
 /**
@@ -28,10 +31,32 @@ public class SlangWordCRUD extends JFrame{
     private static JButton searchButton;
     private static JScrollPane wordListPane;
     private static JPanel definitionPane;
+    private static JEditorPane definitionEditorPane;
     
-    private static JList wordList;
+    private static JList wordListContainer;
     public SlangWordCRUD() {
+        initWordListContainer(SlangWordUtils.getWordListTM());
         createAndShowGUI();
+    }
+    
+    private void initWordListContainer(TreeMap<String, String[]> wordList){
+        Vector<SlangWord> items = new Vector<>();
+        wordList.entrySet().stream().map((entry) -> {
+            SlangWord word = new SlangWord();
+            word.setWord(entry.getKey());
+            word.setDefinitionList(entry.getValue());
+            return word;
+        }).forEachOrdered((word) -> {
+            items.add(word);
+        });
+        wordListContainer = new JList(items);
+        wordListContainer.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        wordListContainer.setLayoutOrientation(JList.VERTICAL);
+        wordListContainer.setVisibleRowCount(-1);
+        wordListContainer.addListSelectionListener((ListSelectionEvent e) -> {
+            SlangWord selectedWord = (SlangWord)wordListContainer.getSelectedValue();
+            definitionEditorPane.setText(SlangWordUtils.convertWordToHtml(selectedWord));
+        });
     }
     
     private void createAndShowGUI() {
@@ -126,16 +151,8 @@ public class SlangWordCRUD extends JFrame{
         c.gridwidth = 1;
         searchPane.add(searchButton, c);
         
-        String[] choices = {"A", "long", "array", "of", "strings"};
-        
-        //set word list
-        wordList = new JList(choices);
-        wordList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        wordList.setLayoutOrientation(JList.VERTICAL);
-        wordList.setVisibleRowCount(-1);
-        
         //set word list pane
-        wordListPane = new JScrollPane(wordList);
+        wordListPane = new JScrollPane(wordListContainer);
         
         //set the left pane
         leftPane = new JPanel();
@@ -144,9 +161,14 @@ public class SlangWordCRUD extends JFrame{
         leftPane.add(searchPane, BorderLayout.NORTH);
         leftPane.add(wordListPane, BorderLayout.CENTER);
         
+        //set definitionEditorPane
+        definitionEditorPane = new JEditorPane();
+        definitionEditorPane.setContentType("text/html");
+        definitionEditorPane.setEditable(false);
         
         //set definition pane
-        definitionPane = new JPanel();
+        definitionPane = new JPanel(new BorderLayout());
+        definitionPane.add(definitionEditorPane, BorderLayout.CENTER);
         
         // set main pane
         mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPane, definitionPane);
