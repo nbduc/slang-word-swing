@@ -87,15 +87,15 @@ public class SlangWordCRUD extends JFrame{
                 SlangWord searchResult = SlangWordUtils.searchByWord(searchString);
                 if(searchResult != null){
                     definitionEditorPane.setText(SlangWordUtils.convertWordToHtml(searchResult));
+                    Vector<SlangWord> wordList = new Vector<>();
+                    wordList.add(searchResult);
+                    createNewWordList(wordList);
                 } else {
                     definitionEditorPane.setText(NoDataHtmlContent());
                 }
             } else {
                 HashSet<SlangWord> searchResult = SlangWordUtils.searchByDef(searchString);
                 createNewWordList(searchResult);
-                searchResult.forEach((sw) -> {
-                    System.out.println(sw.toString());
-                });
             }
         }
     }
@@ -144,10 +144,14 @@ public class SlangWordCRUD extends JFrame{
         
         JMenuItem guessWordItem = new JMenuItem("Guess the Word!...");
         guessWordItem.addActionListener((ActionEvent e) -> {
-            GuessTheWord guessTheWordFrame = new GuessTheWord();
+            GuessQuiz guessTheWordFrame = new GuessQuiz(true);
             guessTheWordFrame.setVisible(true);
         });
         JMenuItem guessDefItem = new JMenuItem("Guess the Definition!...");
+        guessDefItem.addActionListener((ActionEvent e) -> {
+            GuessQuiz guessTheDefinitionFrame = new GuessQuiz(false);
+            guessTheDefinitionFrame.setVisible(true);
+        });
         
         quizMenu.add(guessWordItem);
         quizMenu.add(guessDefItem);
@@ -165,16 +169,16 @@ public class SlangWordCRUD extends JFrame{
         searchTextField.addActionListener((ActionEvent e) -> searchAndDisplayResult());
         searchTextField.getDocument().addDocumentListener(new DocumentListener(){
             public void changedUpdate(DocumentEvent e) {
-                warn();
+                action();
             }
             public void removeUpdate(DocumentEvent e) {
-                warn();
+                action();
             }
             public void insertUpdate(DocumentEvent e) {
-                warn();
+                action();
             }
 
-            public void warn() {
+            public void action() {
                 if ("".equals(searchTextField.getText())){
                     createNewWordList(originWordList);
                 }

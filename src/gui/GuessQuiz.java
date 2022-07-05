@@ -18,12 +18,13 @@ import utils.SlangWordUtils;
  *
  * @author duc
  */
-public class GuessTheWord extends JFrame{
+public class GuessQuiz extends JFrame{
+    private boolean isGuessTheWordQuiz;
     private ArrayList<SlangWord> randomSlangWordList;
     private int answeringIndex = 0;
-    private JLabel titleLabel = new JLabel("Guess the Word Quiz");
-    private JLabel conductLabel = new JLabel("Choose the word that matches the following meaning:");
-    private JLabel definitionLabel = new JLabel();
+    private JLabel titleLabel;
+    private JLabel conductLabel;
+    private JLabel topicLabel = new JLabel();
     private JRadioButton answer0RadioButton = new JRadioButton();
     private JRadioButton answer1RadioButton = new JRadioButton();
     private JRadioButton answer2RadioButton = new JRadioButton();
@@ -36,13 +37,23 @@ public class GuessTheWord extends JFrame{
         Random random = new Random();
         answeringIndex = random.nextInt(4);
         SlangWord answeringWord = randomSlangWordList.get(answeringIndex);
-        String definitionString = answeringWord.getDefinitionList()[random.nextInt(answeringWord.getDefinitionList().length)];
-        definitionLabel.setText(definitionString);
         
-        answer0RadioButton.setText(randomSlangWordList.get(0).getWord());
-        answer1RadioButton.setText(randomSlangWordList.get(1).getWord());
-        answer2RadioButton.setText(randomSlangWordList.get(2).getWord());
-        answer3RadioButton.setText(randomSlangWordList.get(3).getWord());
+        if(isGuessTheWordQuiz){
+            String definitionString = answeringWord.getDefinitionList()[random.nextInt(answeringWord.getDefinitionList().length)];
+            topicLabel.setText(definitionString);
+
+            answer0RadioButton.setText(randomSlangWordList.get(0).getWord());
+            answer1RadioButton.setText(randomSlangWordList.get(1).getWord());
+            answer2RadioButton.setText(randomSlangWordList.get(2).getWord());
+            answer3RadioButton.setText(randomSlangWordList.get(3).getWord());
+        } else {
+            topicLabel.setText(answeringWord.getWord());
+            
+            answer0RadioButton.setText(randomSlangWordList.get(0).getDefinitionListString());
+            answer1RadioButton.setText(randomSlangWordList.get(1).getDefinitionListString());
+            answer2RadioButton.setText(randomSlangWordList.get(2).getDefinitionListString());
+            answer3RadioButton.setText(randomSlangWordList.get(3).getDefinitionListString());
+        }
         
         answerOptionButtonGroup.clearSelection();
         
@@ -53,12 +64,15 @@ public class GuessTheWord extends JFrame{
         JPanel mainPane = new JPanel();
         mainPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         mainPane.setLayout(new BoxLayout(mainPane, BoxLayout.Y_AXIS));
+        titleLabel = new JLabel(isGuessTheWordQuiz? "Guess the Word Quiz" : "Guess the Definition Quiz");
         titleLabel.setFont(new Font("Calibri", Font.PLAIN, 30));
+        conductLabel = new JLabel(isGuessTheWordQuiz? "Choose the word that matches the following meaning:" : 
+                "Choose the definition that matches the following word:");
         mainPane.add(titleLabel);
         mainPane.add(conductLabel);
         
-        definitionLabel.setFont(new Font("Calibri", Font.PLAIN, 20));
-        mainPane.add(definitionLabel);
+        topicLabel.setFont(new Font("Calibri", Font.PLAIN, 20));
+        mainPane.add(topicLabel);
         
         class ChooseWordActionListener implements ActionListener {
             public void actionPerformed(ActionEvent ex) {
@@ -104,12 +118,13 @@ public class GuessTheWord extends JFrame{
         mainPane.add(checkButton);
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(mainPane, BorderLayout.CENTER);
-        setTitle("Guess the Word");
-        setSize(400, 300);
+        setTitle(isGuessTheWordQuiz? "Guess the Word":"Guess the Definition");
+        setSize(550, 300);
         setLocationRelativeTo(null);
     }
     
-    public GuessTheWord() {
+    public GuessQuiz(boolean isGuessTheWordQuiz) {
+        this.isGuessTheWordQuiz = isGuessTheWordQuiz;
         createNew();
         createAndShowGUI();
     }

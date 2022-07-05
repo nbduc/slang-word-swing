@@ -51,4 +51,26 @@ public class SlangWord {
     public String toString(){
         return word;
     }
+    
+    public String getDefinitionListString() {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < definitionList.length; i++){
+            if(i == definitionList.length - 1){
+                builder.append("[")
+                        .append(definitionList[i])
+                        .append("]");
+            } else if (i == definitionList.length - 2) {
+                builder.append("[")
+                        .append(definitionList[i])
+                        .append("]")
+                        .append(" or ");
+            } else {
+                builder.append("[")
+                        .append(definitionList[i])
+                        .append("]")
+                        .append(", ");
+            }
+        }
+        return builder.toString();
+    }
 }
