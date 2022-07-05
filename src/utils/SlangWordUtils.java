@@ -9,6 +9,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.TreeMap;
 import model.SlangWord;
@@ -20,12 +23,20 @@ import model.SlangWord;
 public class SlangWordUtils {
     private static final String FILE_PATH = "slang.txt";
     private static TreeMap<String, String[]> wordListTM;
+    private static HashMap<String, LinkedList<SlangWord>> wordListHM;
     
     public static TreeMap<String, String[]> getWordListTM(){
         if(wordListTM == null){
             loadAllWords();
         }
         return wordListTM;
+    }
+    
+    public static HashMap<String, LinkedList<SlangWord>> getWordListHM() {
+        if(wordListHM == null){
+            loadAllWords();
+        }
+        return wordListHM;
     }
     
     public static SlangWord searchByWord(String searchString){
@@ -37,8 +48,23 @@ public class SlangWordUtils {
         return null;
     }
     
+    public static HashSet<SlangWord> searchByDef(String searchString){
+        HashSet<SlangWord> result = new HashSet<>();
+        String[] searchStringList = searchString.split("\\s+");
+        for (String w : searchStringList){
+            if(wordListHM.containsKey(w)){
+                for(SlangWord sw : wordListHM.get(w)){
+                    result.add(sw);
+                }
+            }
+        }
+        return result;
+    }
+    
     private static void loadAllWords(){
-        TreeMap<String, String[]> wordList = new TreeMap<>();
+        TreeMap<String, String[]> resultWordListTM = new TreeMap<>();
+        HashMap<String, LinkedList<SlangWord>> resultWordListHM = new HashMap<>();
+        
         try (BufferedReader reader = new BufferedReader (new FileReader(FILE_PATH))){
             //get header
             String line;
@@ -48,12 +74,28 @@ public class SlangWordUtils {
             line = reader.readLine();
             while (line != null) {
                 String[] parts = line.split("`");
-                
-                if(!wordList.containsKey(parts[0])){
-                    if(parts.length > 1){
-                        wordList.put(parts[0], parts[1].split("\\| "));
-                    } else {
-                        wordList.put(parts[0], null);
+                if(parts.length > 1){
+                    String word = parts[0];
+                    String[] defs = parts[1].split("\\| ");
+
+                    //set wordListTM
+                    if(!resultWordListTM.containsKey(word)){
+                        resultWordListTM.put(word, defs);
+                    }
+
+                    //set wordListHM
+                    SlangWord newSlangWord = new SlangWord(word, defs);
+                    for (String def : defs){
+                        for (String w : def.split("\\s+")){
+                            w = w.toLowerCase();
+                            if(resultWordListHM.containsKey(w)){
+                                resultWordListHM.get(w).add(newSlangWord);
+                            } else {
+                                LinkedList<SlangWord> wList = new LinkedList<>();
+                                wList.add(newSlangWord);
+                                resultWordListHM.put(w, wList);
+                            }
+                        }
                     }
                 }
                 line = reader.readLine();
@@ -61,7 +103,8 @@ public class SlangWordUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        wordListTM = wordList;
+        wordListTM = resultWordListTM;
+        wordListHM = resultWordListHM;
     }
     
     public static String convertWordToHtml(SlangWord word){

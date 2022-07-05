@@ -8,9 +8,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.Collection;
+import javax.swing.event.DocumentListener;
+import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.Vector;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
 import javax.swing.event.ListSelectionEvent;
 import model.SlangWord;
 import utils.SlangWordUtils;
@@ -20,6 +24,8 @@ import utils.SlangWordUtils;
  * @author duc
  */
 public class SlangWordCRUD extends JFrame{
+    private static boolean isSearchingByWord = true;
+    
     private static JMenuBar menubar;
     private static JSplitPane mainPane;
     private static JPanel sidePane;
@@ -33,31 +39,33 @@ public class SlangWordCRUD extends JFrame{
     private static JScrollPane wordListPane;
     private static JPanel definitionPane;
     private static JEditorPane definitionEditorPane;
-    
     private static JList wordListContainer;
+    private static Collection<SlangWord> originWordList;
+    
     public SlangWordCRUD() {
-        initWordListContainer(SlangWordUtils.getWordListTM());
         createAndShowGUI();
+        initOriginWordList();
+        createNewWordList(originWordList);
     }
     
-    private void initWordListContainer(TreeMap<String, String[]> wordList){
-        Vector<SlangWord> items = new Vector<>();
-        wordList.entrySet().stream().map((entry) -> {
+    private static void initOriginWordList( ){
+        TreeMap<String, String[]> wordListTM = SlangWordUtils.getWordListTM();
+        Collection<SlangWord> wordList = new Vector<>();
+        wordListTM.entrySet().stream().map((entry) -> {
             SlangWord word = new SlangWord();
             word.setWord(entry.getKey());
             word.setDefinitionList(entry.getValue());
             return word;
         }).forEachOrdered((word) -> {
-            items.add(word);
+            wordList.add(word);
         });
-        wordListContainer = new JList(items);
-        wordListContainer.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        wordListContainer.setLayoutOrientation(JList.VERTICAL);
-        wordListContainer.setVisibleRowCount(-1);
-        wordListContainer.addListSelectionListener((ListSelectionEvent e) -> {
-            SlangWord selectedWord = (SlangWord)wordListContainer.getSelectedValue();
-            definitionEditorPane.setText(SlangWordUtils.convertWordToHtml(selectedWord));
-        });
+        originWordList = wordList;
+    }
+    
+    private static void createNewWordList(Collection<SlangWord> wordList){
+        DefaultListModel model = new DefaultListModel();
+        model.addAll(wordList);
+        wordListContainer.setModel(model);
     }
     
     private String NoDataHtmlContent(){
@@ -74,11 +82,20 @@ public class SlangWordCRUD extends JFrame{
         String searchString = searchTextField.getText();
         if(!"".equals(searchString)){
             wordListContainer.clearSelection();
-            SlangWord searchResult = SlangWordUtils.searchByWord(searchString);
-            if(searchResult != null){
-                definitionEditorPane.setText(SlangWordUtils.convertWordToHtml(searchResult));
+            
+            if(isSearchingByWord){
+                SlangWord searchResult = SlangWordUtils.searchByWord(searchString);
+                if(searchResult != null){
+                    definitionEditorPane.setText(SlangWordUtils.convertWordToHtml(searchResult));
+                } else {
+                    definitionEditorPane.setText(NoDataHtmlContent());
+                }
             } else {
-                definitionEditorPane.setText(NoDataHtmlContent());
+                HashSet<SlangWord> searchResult = SlangWordUtils.searchByDef(searchString);
+                createNewWordList(searchResult);
+                searchResult.forEach((sw) -> {
+                    System.out.println(sw.toString());
+                });
             }
         }
     }
@@ -146,14 +163,44 @@ public class SlangWordCRUD extends JFrame{
         //set search text field
         searchTextField = new JTextField();
         searchTextField.addActionListener((ActionEvent e) -> searchAndDisplayResult());
+        searchTextField.getDocument().addDocumentListener(new DocumentListener(){
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            public void warn() {
+                if ("".equals(searchTextField.getText())){
+                    createNewWordList(originWordList);
+                }
+            }
+        });
         
         //set search button
         searchButton = new JButton("Search");
         searchButton.addActionListener((ActionEvent e) -> searchAndDisplayResult());
         
         //set search option
+        class ChooseSearchOptionActionListener implements ActionListener {
+            public void actionPerformed(ActionEvent ex) {
+                isSearchingByWord = Boolean.parseBoolean(searchOptionButtonGroup.getSelection().getActionCommand());
+            }
+        }
+        ChooseSearchOptionActionListener csoal = new ChooseSearchOptionActionListener();
         searchByWordRadioButton = new JRadioButton("Search by word");
+        searchByWordRadioButton.setSelected(true);
+        searchByWordRadioButton.setActionCommand("true");
+        searchByWordRadioButton.addActionListener(csoal);
+        
         searchByDefinitionRadioButton = new JRadioButton("Search by definition");
+        searchByDefinitionRadioButton.setActionCommand("false");
+        searchByDefinitionRadioButton.addActionListener(csoal);
+        
         searchOptionButtonGroup = new ButtonGroup();
         searchOptionButtonGroup.add(searchByWordRadioButton);
         searchOptionButtonGroup.add(searchByDefinitionRadioButton);
@@ -180,6 +227,16 @@ public class SlangWordCRUD extends JFrame{
         c.gridx = 1;
         c.gridwidth = 1;
         searchPane.add(searchButton, c);
+        
+        //set word list container
+        wordListContainer = new JList();
+        wordListContainer.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        wordListContainer.setLayoutOrientation(JList.VERTICAL);
+        wordListContainer.setVisibleRowCount(-1);
+        wordListContainer.addListSelectionListener((ListSelectionEvent e) -> {
+            SlangWord selectedWord = (SlangWord)wordListContainer.getSelectedValue();
+            definitionEditorPane.setText(SlangWordUtils.convertWordToHtml(selectedWord));
+        });
         
         //set word list pane
         wordListPane = new JScrollPane(wordListContainer);
