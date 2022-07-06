@@ -9,7 +9,7 @@ package model;
  *
  * @author duc
  */
-public class SlangWord {
+public class SlangWord implements Comparable<SlangWord>{
     private String word;
     private String[] definitionList;
     
@@ -72,5 +72,10 @@ public class SlangWord {
             }
         }
         return builder.toString();
+    }
+
+    @Override
+    public int compareTo(SlangWord o) {
+        return this.getWord().compareTo(o.getWord());
     }
 }

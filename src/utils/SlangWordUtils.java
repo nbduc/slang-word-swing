@@ -10,10 +10,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import model.SlangWord;
 
 /**
@@ -21,7 +21,8 @@ import model.SlangWord;
  * @author duc
  */
 public class SlangWordUtils {
-    private static final String FILE_PATH = "slang.txt";
+    private static final String SLANG_FILE_PATH = "slang.txt";
+    
     private static TreeMap<String, String[]> wordListTM;
     private static HashMap<String, LinkedList<SlangWord>> wordListHM;
     
@@ -48,14 +49,14 @@ public class SlangWordUtils {
         return null;
     }
     
-    public static HashSet<SlangWord> searchByDef(String searchString){
-        HashSet<SlangWord> result = new HashSet<>();
+    public static TreeSet<SlangWord> searchByDef(String searchString){
+        TreeSet<SlangWord> result = new TreeSet<>();
         String[] searchStringList = searchString.split("\\s+");
-        for (String w : searchStringList){
+        for (var w : searchStringList){
             if(wordListHM.containsKey(w)){
-                for(SlangWord sw : wordListHM.get(w)){
+                wordListHM.get(w).forEach((sw) -> {
                     result.add(sw);
-                }
+                });
             }
         }
         return result;
@@ -65,9 +66,9 @@ public class SlangWordUtils {
         TreeMap<String, String[]> resultWordListTM = new TreeMap<>();
         HashMap<String, LinkedList<SlangWord>> resultWordListHM = new HashMap<>();
         
-        try (BufferedReader reader = new BufferedReader (new FileReader(FILE_PATH))){
-            //get header
+        try (BufferedReader reader = new BufferedReader (new FileReader(SLANG_FILE_PATH))){
             String line;
+            //get header
             reader.readLine();
             
             //get wordList
