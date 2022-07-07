@@ -68,6 +68,11 @@ public class SlangWordCRUD extends JFrame{
         originWordList = wordList;
     }
     
+    private static void displayWordFromHistory(String word){
+        isSearchingByWord = true;
+        searchAndDisplayResult(word);
+    }
+    
     private static void createNewHistoryList(){
         historyMenu.removeAll();
         TreeSet<History> last10HistoryList = HistoryUtils.getLast10HistoryList();
@@ -79,8 +84,7 @@ public class SlangWordCRUD extends JFrame{
                 }
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    isSearchingByWord = true;
-                    searchAndDisplayResult(word);
+                    displayWordFromHistory(word);
                 }
             }
             last10HistoryList.forEach(history -> {
@@ -93,6 +97,10 @@ public class SlangWordCRUD extends JFrame{
         JMenuItem historyListMenuItem = new JMenuItem("History...");
         historyListMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, 
                 ActionEvent.CTRL_MASK));
+        historyListMenuItem.addActionListener((ActionEvent e) -> {
+            HistoryDialog historyDialog = new HistoryDialog(null, "History");
+            displayWordFromHistory(historyDialog.getReturnedValue());
+        });
         historyMenu.add(historyListMenuItem);
     }
     

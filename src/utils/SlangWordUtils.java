@@ -41,10 +41,12 @@ public class SlangWordUtils {
     }
     
     public static SlangWord searchByWord(String searchString){
-        searchString = searchString.toUpperCase();
-        if(wordListTM.containsKey(searchString)){
-            SlangWord result = new SlangWord(searchString, wordListTM.get(searchString));
-            return result;
+        if(searchString != null){
+            searchString = searchString.toUpperCase();
+            if(wordListTM.containsKey(searchString)){
+                SlangWord result = new SlangWord(searchString, wordListTM.get(searchString));
+                return result;
+            }
         }
         return null;
     }

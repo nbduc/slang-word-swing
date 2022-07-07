@@ -5,6 +5,10 @@
  */
 package model;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  *
  * @author duc
@@ -54,6 +58,12 @@ public class History implements Comparable<History>{
     }
     
     public String toString(){
+        DateFormat df = new SimpleDateFormat("dd/MM/yy hh:mm:ss");
+        Date time = new Date(epochSecond * 1000);
+        return df.format(time) + " - " + word;
+    }
+    
+    public String convertToCsv(){
         return epochSecond + "," + word;
     }
 }

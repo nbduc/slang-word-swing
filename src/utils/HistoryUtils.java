@@ -78,7 +78,7 @@ public class HistoryUtils {
             try (PrintWriter pw = new PrintWriter(
                     new BufferedWriter(
                             new FileWriter(historyFile, true)))){
-                pw.println(newHistory.toString());
+                pw.println(newHistory.convertToCsv());
                 pw.flush();
             }
             historyList.add(newHistory);
