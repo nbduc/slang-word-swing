@@ -5,8 +5,12 @@
  */
 package utils;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -64,6 +68,22 @@ public class SlangWordUtils {
         return result;
     }
     
+    private static void addNewSlangWordToHashMap(HashMap<String, LinkedList<SlangWord>> hm, SlangWord newSlangWord){
+        String[] defs = newSlangWord.getDefinitionList();
+        for (String def : defs){
+            for (String w : def.split("\\s+")){
+                w = w.toLowerCase();
+                if(hm.containsKey(w)){
+                    hm.get(w).add(newSlangWord);
+                } else {
+                    LinkedList<SlangWord> wList = new LinkedList<>();
+                    wList.add(newSlangWord);
+                    hm.put(w, wList);
+                }
+            }
+        }
+    }
+    
     private static void loadAllWords(){
         TreeMap<String, String[]> resultWordListTM = new TreeMap<>();
         HashMap<String, LinkedList<SlangWord>> resultWordListHM = new HashMap<>();
@@ -88,18 +108,7 @@ public class SlangWordUtils {
 
                     //set wordListHM
                     SlangWord newSlangWord = new SlangWord(word, defs);
-                    for (String def : defs){
-                        for (String w : def.split("\\s+")){
-                            w = w.toLowerCase();
-                            if(resultWordListHM.containsKey(w)){
-                                resultWordListHM.get(w).add(newSlangWord);
-                            } else {
-                                LinkedList<SlangWord> wList = new LinkedList<>();
-                                wList.add(newSlangWord);
-                                resultWordListHM.put(w, wList);
-                            }
-                        }
-                    }
+                    addNewSlangWordToHashMap(resultWordListHM, newSlangWord);
                 }
                 line = reader.readLine();
             }
@@ -147,5 +156,37 @@ public class SlangWordUtils {
             wordListResult.add(new SlangWord(randomWord, wordListTM.get(randomWord)));
         }
         return wordListResult;
+    }
+    
+    private static boolean writeNewWordToFile(SlangWord newSlangWord){
+        try {
+            File slangWordFile = new File(SLANG_FILE_PATH);
+            if(!slangWordFile.exists()){
+                slangWordFile.createNewFile();
+            }
+            try (PrintWriter pw = new PrintWriter(
+                    new BufferedWriter(
+                            new FileWriter(slangWordFile, true)))){
+                pw.println(newSlangWord.convertToCsv());
+                pw.flush();
+            }
+        } catch (IOException ex){
+            ex.printStackTrace();
+        }
+        return false;
+    }
+    
+    public static boolean writeNewWord(SlangWord newSlangWord){
+        if(wordListTM != null && wordListHM != null){
+            String word = newSlangWord.getWord();
+            String[] defs = newSlangWord.getDefinitionList();
+            wordListTM.put(word, defs);
+            addNewSlangWordToHashMap(wordListHM, newSlangWord);
+            writeNewWordToFile(newSlangWord);
+            
+            return true;
+        } else {
+            return false;
+        }
     }
 }

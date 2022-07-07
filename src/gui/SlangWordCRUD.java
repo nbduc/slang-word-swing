@@ -99,7 +99,10 @@ public class SlangWordCRUD extends JFrame{
                 ActionEvent.CTRL_MASK));
         historyListMenuItem.addActionListener((ActionEvent e) -> {
             HistoryDialog historyDialog = new HistoryDialog(null, "History");
-            displayWordFromHistory(historyDialog.getReturnedValue());
+            String history = historyDialog.getReturnedValue();
+            if(history != null){
+                displayWordFromHistory(historyDialog.getReturnedValue());
+            }
         });
         historyMenu.add(historyListMenuItem);
     }
@@ -115,6 +118,19 @@ public class SlangWordCRUD extends JFrame{
         htmlContent.append("<html>")
                 .append("<i style=\"color: red;\">")
                 .append("Cannot find that word!")
+                .append("</i>")
+                .append("</html>");
+        return htmlContent.toString();
+    }
+    
+    private static String WelcomeHtmlContent(){
+        StringBuilder htmlContent = new StringBuilder();
+        htmlContent.append("<html>")
+                .append("<h1>")
+                .append("Welcome to")
+                .append("</h1>")
+                .append("<i>")
+                .append("Slang Word Dictionary")
                 .append("</i>")
                 .append("</html>");
         return htmlContent.toString();
@@ -167,9 +183,18 @@ public class SlangWordCRUD extends JFrame{
         JMenu editMenu = new JMenu("Edit");
         editMenu.setMnemonic(KeyEvent.VK_E);
         
-        JMenuItem newItem = new JMenuItem("Create a New Word...");
+        JMenuItem newItem = new JMenuItem("Create a new Word...");
         newItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, 
                 ActionEvent.CTRL_MASK));
+        newItem.addActionListener((ActionEvent e) -> {
+            CreateNewWordDialog newDialog = new CreateNewWordDialog(null, "Create a new Word");
+            SlangWord newSlangWord = newDialog.getReturnedValue();
+            if(newSlangWord != null){
+                SlangWordUtils.writeNewWord(newSlangWord);
+                initOriginWordList();
+                createNewWordList(originWordList);
+            }
+        });
         JMenuItem editItem = new JMenuItem("Edit the Word...");
         editItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, 
                 ActionEvent.CTRL_MASK));
@@ -309,6 +334,7 @@ public class SlangWordCRUD extends JFrame{
         //set definitionEditorPane
         definitionEditorPane = new JEditorPane();
         definitionEditorPane.setContentType("text/html");
+        definitionEditorPane.setText(WelcomeHtmlContent());
         definitionEditorPane.setEditable(false);
         
         //set definition pane

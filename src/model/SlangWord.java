@@ -78,4 +78,17 @@ public class SlangWord implements Comparable<SlangWord>{
     public int compareTo(SlangWord o) {
         return this.getWord().compareTo(o.getWord());
     }
+    
+    public String convertToCsv(){
+        StringBuilder builder = new StringBuilder();
+        builder.append(word).append("`");
+        for(int i = 0; i < definitionList.length; i++){
+            builder.append(definitionList[i]);
+            if(i != definitionList.length - 1){
+                builder.append("| ");
+            }
+        }
+        
+        return builder.toString();
+    }
 }
