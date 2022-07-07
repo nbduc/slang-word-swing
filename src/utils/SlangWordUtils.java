@@ -19,6 +19,9 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import model.SlangWord;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.Writer;
 
 /**
  *
@@ -187,6 +190,67 @@ public class SlangWordUtils {
             return true;
         } else {
             return false;
+        }
+    }
+    
+    private static void removeWordFromTreeMap(String word){
+        if(wordListTM.containsKey(word)){
+            wordListTM.remove(word);
+        }
+    }
+    
+    private static void removeWordFromHashMap(SlangWord word){
+        String[] defs = word.getFlatDefinitionList();
+        for(String def : defs){
+            if(wordListHM.containsKey(def)){
+                wordListHM.get(def).remove(word);
+            }
+        }
+        
+    }
+    
+    public static boolean editWord(SlangWord oldSlangWord, SlangWord editedSlangWord){
+        if(wordListTM != null && wordListHM != null){
+            if(wordListTM.containsKey(editedSlangWord.getWord())){
+                //user's changed the word key
+                wordListTM.replace(editedSlangWord.getWord(), editedSlangWord.getDefinitionList());
+            } else {
+                //user's not changed the word key
+                wordListTM.remove(oldSlangWord.getWord());
+                wordListTM.put(editedSlangWord.getWord(), editedSlangWord.getDefinitionList());
+            }
+            
+            //
+            removeWordFromHashMap(oldSlangWord);
+            addNewSlangWordToHashMap(wordListHM, editedSlangWord);
+        }
+        return false;
+    }
+    
+    public static void saveWordListToFile(){
+        File wordListTmFile = new File("slang_tm.json");
+        File wordListHmFile = new File("slang_hm.json");
+        Gson gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
+        try (Writer writerTm = new FileWriter(wordListTmFile); 
+                Writer writerHm = new FileWriter(wordListHmFile);) {
+            if(!wordListTmFile.exists()){
+                wordListTmFile.createNewFile();
+            }
+            if(!wordListHmFile.exists()){
+                wordListHmFile.createNewFile();
+            }
+            gson.toJson(wordListTM, writerTm);
+            gson.toJson(wordListHM, writerHm);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public static void loadWordList(){
+        if(wordListTM == null || wordListHM == null){
+            
         }
     }
 }

@@ -5,12 +5,14 @@
  */
 package gui;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import model.SlangWord;
@@ -19,7 +21,9 @@ import model.SlangWord;
  *
  * @author duc
  */
-public class CreateNewWordDialog extends JDialog{
+public class TheWordDialog extends JDialog{
+    private boolean isEditDialog = false;
+    private SlangWord oldSlangWord;
     private SlangWord returnedValue;
     private final JButton cancelButton = new JButton("Cancel");
     private final JButton okButton = new JButton("OK");
@@ -74,9 +78,13 @@ public class CreateNewWordDialog extends JDialog{
                 removeButton.setEnabled(false);
             }
         });
+        definitionList.setPreferredSize(new Dimension(255, -1));
         JScrollPane definitionListPane = new JScrollPane(definitionList);
         
         //set word text field
+        if(isEditDialog){
+            wordTextField.setText(oldSlangWord.getWord());
+        }
         
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
@@ -137,7 +145,15 @@ public class CreateNewWordDialog extends JDialog{
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
     
-    public CreateNewWordDialog(JFrame parent, String title) {
+    public TheWordDialog(JFrame parent, String title, SlangWord oldSlangWord){
+        super(parent, title, ModalityType.APPLICATION_MODAL);
+        isEditDialog = true;
+        this.oldSlangWord = oldSlangWord;
+        defs.addAll(Arrays.asList(oldSlangWord.getDefinitionList()));
+        createAndShowGUI();
+    }
+    
+    public TheWordDialog(JFrame parent, String title) {
         super(parent, title, ModalityType.APPLICATION_MODAL);
         createAndShowGUI();
     }

@@ -165,6 +165,30 @@ public class SlangWordCRUD extends JFrame{
         }
     }
     
+    private void showCreateDialog(){
+        TheWordDialog newDialog = new TheWordDialog(null, "Create a new Word");
+        SlangWord newSlangWord = newDialog.getReturnedValue();
+        if(newSlangWord != null){
+            SlangWordUtils.writeNewWord(newSlangWord);
+            initOriginWordList();
+            createNewWordList(originWordList);
+        }
+    }
+    
+    private void showEditDialog(){
+        SlangWord oldSlangWord = (SlangWord)wordListContainer.getSelectedValue();
+        if(oldSlangWord != null){
+            TheWordDialog newDialog = new TheWordDialog(null, "Edit", oldSlangWord);
+            SlangWord editedSlangWord = newDialog.getReturnedValue();
+            if(editedSlangWord != null){
+                SlangWordUtils.editWord(oldSlangWord, editedSlangWord);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Please choose a word!", "Warning", 
+                        JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
     private void createAndShowGUI() {
         //set file menu
         JMenu fileMenu = new JMenu("File");
@@ -187,17 +211,15 @@ public class SlangWordCRUD extends JFrame{
         newItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, 
                 ActionEvent.CTRL_MASK));
         newItem.addActionListener((ActionEvent e) -> {
-            CreateNewWordDialog newDialog = new CreateNewWordDialog(null, "Create a new Word");
-            SlangWord newSlangWord = newDialog.getReturnedValue();
-            if(newSlangWord != null){
-                SlangWordUtils.writeNewWord(newSlangWord);
-                initOriginWordList();
-                createNewWordList(originWordList);
-            }
+            showCreateDialog();
         });
         JMenuItem editItem = new JMenuItem("Edit the Word...");
         editItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, 
                 ActionEvent.CTRL_MASK));
+        editItem.addActionListener((ActionEvent e) -> {
+            showEditDialog();
+        });
+        
         JMenuItem deleteItem = new JMenuItem("Delete the Word");
         deleteItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, 
                 ActionEvent.CTRL_MASK));
@@ -316,13 +338,34 @@ public class SlangWordCRUD extends JFrame{
         wordListContainer.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) 
             {
-                SlangWord selectedWord = (SlangWord)wordListContainer.getSelectedValue();
-                displayWordDetailAndWriteHistory(selectedWord);
+                if(SwingUtilities.isLeftMouseButton(e)){
+                    SlangWord selectedWord = (SlangWord)wordListContainer.getSelectedValue();
+                    displayWordDetailAndWriteHistory(selectedWord);
+                }
             }
         });
         
         //set word list pane
         wordListPane = new JScrollPane(wordListContainer);
+        
+        //set function popup menu
+        JPopupMenu funcPopupMenu = new JPopupMenu();
+        JMenuItem editPopupMenuItem = new JMenuItem("Edit");
+        editPopupMenuItem.addActionListener((ActionEvent e) -> {
+            showEditDialog();
+        });
+        JMenuItem deletePopupMenuItem = new JMenuItem("Delete");
+        funcPopupMenu.add(editPopupMenuItem);
+        funcPopupMenu.add(deletePopupMenuItem);
+        wordListContainer.addMouseListener(new MouseAdapter(){
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)){
+                    int row = wordListContainer.locationToIndex(e.getPoint());
+                    wordListContainer.setSelectedIndex(row);
+                    funcPopupMenu.show(wordListContainer, e.getX(), e.getY());
+                }
+            }
+        });
         
         //set the left pane
         leftPane = new JPanel();

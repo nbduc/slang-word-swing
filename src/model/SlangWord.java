@@ -5,6 +5,9 @@
  */
 package model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  *
  * @author duc
@@ -90,5 +93,13 @@ public class SlangWord implements Comparable<SlangWord>{
         }
         
         return builder.toString();
+    }
+    
+    public String[] getFlatDefinitionList(){
+        ArrayList<String> result = new ArrayList<>();
+        for(String def: definitionList){
+            result.addAll(Arrays.asList(def.split("\\s+")));
+        }
+        return result.toArray(new String[result.size()]);
     }
 }
