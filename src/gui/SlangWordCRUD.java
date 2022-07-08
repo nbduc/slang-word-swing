@@ -210,6 +210,20 @@ public class SlangWordCRUD extends JFrame{
         }
     }
     
+    private void resetWordList(){
+        int option = JOptionPane.showConfirmDialog(null, 
+            "Are you sure you want to reset the whole word list?", "Reset the Word List?", 
+            JOptionPane.YES_NO_OPTION, 
+            JOptionPane.QUESTION_MESSAGE);
+        if (option == JOptionPane.YES_OPTION){
+            SlangWordUtils.resetTheWordList();
+            initOriginWordList();
+            createNewWordList(originWordList);
+            JOptionPane.showMessageDialog(null, "Successfully reset the word list!", "About", 
+                            JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    
     private void createAndShowGUI() {
         //set file menu
         JMenu fileMenu = new JMenu("File");
@@ -248,6 +262,9 @@ public class SlangWordCRUD extends JFrame{
             deleteWord();
         });
         JMenuItem resetItem = new JMenuItem("Reset the Word List");
+        resetItem.addActionListener((ActionEvent e) -> {
+            resetWordList();
+        });
         
         editMenu.add(newItem);
         editMenu.add(editItem);

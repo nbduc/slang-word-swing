@@ -24,13 +24,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
 
 /**
  *
  * @author duc
  */
 public class SlangWordUtils {
-    private static final String SLANG_FILE_PATH = "slang.txt";
+    private static final String ORIGINAL_SLANG_FILE_PATH = "slang.txt";
+    private static final String MODIFIED_SLANG_FILE_PATH = "modified_slang.txt";
     private static final String SLANG_TM_JSON_FILE_PATH = "slang_tm.json";
     private static final String SLANG_HM_JSON_FILE_PATH = "slang_hm.json";
     
@@ -97,9 +99,20 @@ public class SlangWordUtils {
         if(wordListTM == null || wordListHM == null){
             TreeMap<String, String[]> resultWordListTM = new TreeMap<>();
             HashMap<String, LinkedList<SlangWord>> resultWordListHM = new HashMap<>();
-            File slangFile = new File(SLANG_FILE_PATH);
-            if(slangFile.exists()){
-                try (BufferedReader reader = new BufferedReader (new FileReader(SLANG_FILE_PATH))){
+            File modifiedSlangFile = new File(MODIFIED_SLANG_FILE_PATH);
+            File originalSlangFile = new File(ORIGINAL_SLANG_FILE_PATH);
+            if(!modifiedSlangFile.exists() && originalSlangFile.exists()){
+                try {
+                    //copy from origin file
+                    Files.copy(originalSlangFile.toPath(), modifiedSlangFile.toPath());
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                System.out.println("found");
+            }
+            if(modifiedSlangFile.exists()){
+                try (BufferedReader reader = new BufferedReader (new FileReader(modifiedSlangFile))){
                     String line;
                     //get header
                     reader.readLine();
@@ -173,14 +186,19 @@ public class SlangWordUtils {
     }
     
     private static boolean writeNewWordToFile(SlangWord newSlangWord){
+        boolean hasTitle = true;
         try {
-            File slangWordFile = new File(SLANG_FILE_PATH);
+            File slangWordFile = new File(MODIFIED_SLANG_FILE_PATH);
             if(!slangWordFile.exists()){
                 slangWordFile.createNewFile();
+                hasTitle = false;
             }
             try (PrintWriter pw = new PrintWriter(
                     new BufferedWriter(
                             new FileWriter(slangWordFile, true)))){
+                if(!hasTitle){
+                    pw.println("Slag`Meaning");
+                }
                 pw.println(newSlangWord.convertToCsv());
                 pw.flush();
             }
@@ -192,7 +210,7 @@ public class SlangWordUtils {
     }
     
     private static boolean deleteWordFromFile(SlangWord deletedSlangWord){
-        File slangWordFile = new File(SLANG_FILE_PATH);
+        File slangWordFile = new File(MODIFIED_SLANG_FILE_PATH);
         if(slangWordFile.exists()){
             try (BufferedReader br = new BufferedReader(new FileReader(slangWordFile));) {
                 boolean isFound = false;
@@ -224,7 +242,7 @@ public class SlangWordUtils {
     }
     
     private static boolean replaceWordInFile(SlangWord oldSlangWord, SlangWord newSlangWord){
-        File slangWordFile = new File(SLANG_FILE_PATH);
+        File slangWordFile = new File(MODIFIED_SLANG_FILE_PATH);
         if(slangWordFile.exists()){
             try (BufferedReader br = new BufferedReader(new FileReader(slangWordFile));) {
                 boolean isFound = false;
@@ -370,5 +388,23 @@ public class SlangWordUtils {
                 }
             }
         }
+    }
+    
+    public static void resetTheWordList(){
+        File modifiedSlangFile = new File(MODIFIED_SLANG_FILE_PATH);
+        File slangTMFile = new File(SLANG_TM_JSON_FILE_PATH);
+        File slangHMFile = new File(SLANG_HM_JSON_FILE_PATH);
+        if(modifiedSlangFile.exists()){
+            modifiedSlangFile.delete();
+        }
+        if(slangTMFile.exists()){
+            slangTMFile.delete();
+        }
+        if(slangHMFile.exists()){
+            slangHMFile.delete();
+        }
+        wordListTM = null;
+        wordListHM = null;
+        loadAllWords();
     }
 }
