@@ -192,6 +192,24 @@ public class SlangWordCRUD extends JFrame{
         }
     }
     
+    private void deleteWord(){
+        SlangWord word = (SlangWord)wordListContainer.getSelectedValue();
+        if(word != null){
+            int option = JOptionPane.showConfirmDialog(null, 
+                "Are you sure you want to delete \" " + word.getWord() + "\"?", "Close Window?", 
+                JOptionPane.YES_NO_OPTION, 
+                JOptionPane.QUESTION_MESSAGE);
+            if (option == JOptionPane.YES_OPTION){
+                SlangWordUtils.removeWord(word);
+                initOriginWordList();
+                createNewWordList(originWordList);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Please choose a word!", "Warning", 
+                        JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
     private void createAndShowGUI() {
         //set file menu
         JMenu fileMenu = new JMenu("File");
@@ -226,6 +244,9 @@ public class SlangWordCRUD extends JFrame{
         JMenuItem deleteItem = new JMenuItem("Delete the Word");
         deleteItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, 
                 ActionEvent.CTRL_MASK));
+        deleteItem.addActionListener((ActionEvent e) -> {
+            deleteWord();
+        });
         JMenuItem resetItem = new JMenuItem("Reset the Word List");
         
         editMenu.add(newItem);
@@ -358,6 +379,9 @@ public class SlangWordCRUD extends JFrame{
             showEditDialog();
         });
         JMenuItem deletePopupMenuItem = new JMenuItem("Delete");
+        deletePopupMenuItem.addActionListener((ActionEvent e) -> {
+            deleteWord();
+        });
         funcPopupMenu.add(editPopupMenuItem);
         funcPopupMenu.add(deletePopupMenuItem);
         wordListContainer.addMouseListener(new MouseAdapter(){

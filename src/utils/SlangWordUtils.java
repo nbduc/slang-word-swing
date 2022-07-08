@@ -272,20 +272,34 @@ public class SlangWordUtils {
         }
     }
     
-    private static void removeWordFromTreeMap(String word){
+    private static boolean removeWordFromTreeMap(String word){
         if(wordListTM.containsKey(word)){
             wordListTM.remove(word);
+            return true;
         }
+        return false;
     }
     
-    private static void removeWordFromHashMap(SlangWord word){
+    private static boolean removeWordFromHashMap(SlangWord word){
         String[] defs = word.getFlatDefinitionList();
         for(String def : defs){
             if(wordListHM.containsKey(def)){
                 wordListHM.get(def).remove(word);
+                return true;
             }
         }
-        
+        return false;
+    }
+    
+    public static boolean removeWord(SlangWord word){
+        if(wordListTM != null && wordListHM != null){
+            if(removeWordFromTreeMap(word.getWord()) &&
+                removeWordFromHashMap(word) &&
+                deleteWordFromFile(word)){
+                return true;
+            }
+        }
+        return false;
     }
     
     public static boolean editWord(SlangWord oldSlangWord, SlangWord editedSlangWord){
