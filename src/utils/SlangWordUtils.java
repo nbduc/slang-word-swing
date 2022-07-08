@@ -21,6 +21,8 @@ import java.util.TreeSet;
 import model.SlangWord;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import java.io.Reader;
 import java.io.Writer;
 
 /**
@@ -29,6 +31,8 @@ import java.io.Writer;
  */
 public class SlangWordUtils {
     private static final String SLANG_FILE_PATH = "slang.txt";
+    private static final String SLANG_TM_JSON_FILE_PATH = "slang_tm.json";
+    private static final String SLANG_HM_JSON_FILE_PATH = "slang_hm.json";
     
     private static TreeMap<String, String[]> wordListTM;
     private static HashMap<String, LinkedList<SlangWord>> wordListHM;
@@ -88,38 +92,45 @@ public class SlangWordUtils {
     }
     
     private static void loadAllWords(){
-        TreeMap<String, String[]> resultWordListTM = new TreeMap<>();
-        HashMap<String, LinkedList<SlangWord>> resultWordListHM = new HashMap<>();
+        loadWordListFromJsonFile();
         
-        try (BufferedReader reader = new BufferedReader (new FileReader(SLANG_FILE_PATH))){
-            String line;
-            //get header
-            reader.readLine();
-            
-            //get wordList
-            line = reader.readLine();
-            while (line != null) {
-                String[] parts = line.split("`");
-                if(parts.length > 1){
-                    String word = parts[0];
-                    String[] defs = parts[1].split("\\| ");
+        if(wordListTM == null || wordListHM == null){
+            TreeMap<String, String[]> resultWordListTM = new TreeMap<>();
+            HashMap<String, LinkedList<SlangWord>> resultWordListHM = new HashMap<>();
+            File slangFile = new File(SLANG_FILE_PATH);
+            if(slangFile.exists()){
+                try (BufferedReader reader = new BufferedReader (new FileReader(SLANG_FILE_PATH))){
+                    String line;
+                    //get header
+                    reader.readLine();
 
-                    //set wordListTM
-                    if(!resultWordListTM.containsKey(word)){
-                        resultWordListTM.put(word, defs);
+                    //get wordList
+                    line = reader.readLine();
+                    while (line != null) {
+                        String[] parts = line.split("`");
+                        if(parts.length > 1){
+                            String word = parts[0];
+                            String[] defs = parts[1].split("\\| ");
+
+                            //set wordListTM
+                            if(!resultWordListTM.containsKey(word)){
+                                resultWordListTM.put(word, defs);
+                            }
+
+                            //set wordListHM
+                            SlangWord newSlangWord = new SlangWord(word, defs);
+                            addNewSlangWordToHashMap(resultWordListHM, newSlangWord);
+                        }
+                        line = reader.readLine();
                     }
-
-                    //set wordListHM
-                    SlangWord newSlangWord = new SlangWord(word, defs);
-                    addNewSlangWordToHashMap(resultWordListHM, newSlangWord);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                line = reader.readLine();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            wordListTM = resultWordListTM;
+            wordListHM = resultWordListHM;
         }
-        wordListTM = resultWordListTM;
-        wordListHM = resultWordListHM;
+        
     }
     
     public static String convertWordToHtml(SlangWord word){
@@ -173,8 +184,76 @@ public class SlangWordUtils {
                 pw.println(newSlangWord.convertToCsv());
                 pw.flush();
             }
+            return true;
         } catch (IOException ex){
             ex.printStackTrace();
+            return false;
+        }
+    }
+    
+    private static boolean deleteWordFromFile(SlangWord deletedSlangWord){
+        File slangWordFile = new File(SLANG_FILE_PATH);
+        if(slangWordFile.exists()){
+            try (BufferedReader br = new BufferedReader(new FileReader(slangWordFile));) {
+                boolean isFound = false;
+                StringBuffer stringBuffer = new StringBuffer();
+                br.readLine();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] parts = line.split("`");
+                    if(!parts[0].equals(deletedSlangWord.getWord())){
+                        stringBuffer.append(line);
+                        stringBuffer.append("\n");
+                    } else {
+                        isFound = true;
+                    }
+                }
+                if(isFound){
+                    try (BufferedWriter bw = new BufferedWriter(new FileWriter(slangWordFile))){
+                        bw.append(stringBuffer);
+                        bw.flush();
+                    }
+                    return true;
+                }
+            } catch (IOException ex){
+                ex.printStackTrace();
+                return false;
+            }
+        }
+        return false;
+    }
+    
+    private static boolean replaceWordInFile(SlangWord oldSlangWord, SlangWord newSlangWord){
+        File slangWordFile = new File(SLANG_FILE_PATH);
+        if(slangWordFile.exists()){
+            try (BufferedReader br = new BufferedReader(new FileReader(slangWordFile));) {
+                boolean isFound = false;
+                StringBuffer stringBuffer = new StringBuffer();
+                String reader = br.readLine();
+                stringBuffer.append(reader);
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] parts = line.split("`");
+                    if(!parts[0].equals(oldSlangWord.getWord())){
+                        stringBuffer.append(line);
+                        stringBuffer.append("\n");
+                    } else {
+                        isFound = true;
+                        stringBuffer.append(newSlangWord.convertToCsv());
+                        stringBuffer.append("\n");
+                    }
+                }
+                if(isFound){
+                    try (BufferedWriter bw = new BufferedWriter(new FileWriter(slangWordFile))){
+                        bw.append(stringBuffer);
+                        bw.flush();
+                    }
+                    return true;
+                }
+            } catch (IOException ex){
+                ex.printStackTrace();
+                return false;
+            }
         }
         return false;
     }
@@ -211,6 +290,7 @@ public class SlangWordUtils {
     
     public static boolean editWord(SlangWord oldSlangWord, SlangWord editedSlangWord){
         if(wordListTM != null && wordListHM != null){
+            // modify treemap
             if(wordListTM.containsKey(editedSlangWord.getWord())){
                 //user's changed the word key
                 wordListTM.replace(editedSlangWord.getWord(), editedSlangWord.getDefinitionList());
@@ -220,37 +300,61 @@ public class SlangWordUtils {
                 wordListTM.put(editedSlangWord.getWord(), editedSlangWord.getDefinitionList());
             }
             
-            //
+            //modify hashmap
             removeWordFromHashMap(oldSlangWord);
             addNewSlangWordToHashMap(wordListHM, editedSlangWord);
+            
+            //modify slang file
+            replaceWordInFile(oldSlangWord, editedSlangWord);
+            
         }
         return false;
     }
     
-    public static void saveWordListToFile(){
-        File wordListTmFile = new File("slang_tm.json");
-        File wordListHmFile = new File("slang_hm.json");
-        Gson gson = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
-        try (Writer writerTm = new FileWriter(wordListTmFile); 
-                Writer writerHm = new FileWriter(wordListHmFile);) {
-            if(!wordListTmFile.exists()){
-                wordListTmFile.createNewFile();
+    public static void saveWordListToJsonFile(){
+        if(wordListTM != null && wordListHM != null) {
+            File wordListTmFile = new File(SLANG_TM_JSON_FILE_PATH);
+            File wordListHmFile = new File(SLANG_HM_JSON_FILE_PATH);
+            Gson gson = new Gson();
+            try (Writer writerTm = new BufferedWriter(
+                    new FileWriter(wordListTmFile)); 
+                Writer writerHm = new BufferedWriter(
+                    new FileWriter(wordListHmFile));) {
+                if(!wordListTmFile.exists()){
+                    wordListTmFile.createNewFile();
+                }
+                if(!wordListHmFile.exists()){
+                    wordListHmFile.createNewFile();
+                }
+                gson.toJson(wordListTM, writerTm);
+                gson.toJson(wordListHM, writerHm);
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-            if(!wordListHmFile.exists()){
-                wordListHmFile.createNewFile();
-            }
-            gson.toJson(wordListTM, writerTm);
-            gson.toJson(wordListHM, writerHm);
-        } catch (IOException ex) {
-            ex.printStackTrace();
         }
     }
     
-    public static void loadWordList(){
+    public static void loadWordListFromJsonFile(){
         if(wordListTM == null || wordListHM == null){
-            
+            File wordListTmFile = new File(SLANG_TM_JSON_FILE_PATH);
+            File wordListHmFile = new File(SLANG_HM_JSON_FILE_PATH);
+            Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+            if(wordListTmFile.exists()){
+                try(Reader readerTm = new BufferedReader(new FileReader(wordListTmFile));){
+                    wordListTM = gson.fromJson(readerTm, new TypeToken<TreeMap<String, String[]>>(){}.getType());
+                } catch (IOException ex){
+                    ex.printStackTrace();
+                }
+            }
+            if(wordListHmFile.exists()){
+                try(Reader readerHm = new BufferedReader(new FileReader(wordListHmFile));){
+                    wordListHM = gson.fromJson(readerHm, new TypeToken<HashMap<String, LinkedList<SlangWord>>>() {}.getType());
+                } catch (IOException ex){
+                    ex.printStackTrace();
+                }
+            }
         }
     }
 }

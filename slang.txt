@@ -1,5 +1,4 @@
-Slag`Meaning
-#1`Number one
+#1`Number one| so mot
 $`Dollar| money
 $_$`Has money
 %)`Drunk| giddy

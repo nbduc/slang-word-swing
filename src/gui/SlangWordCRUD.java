@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
 import java.time.Instant;
 import java.util.Collection;
 import javax.swing.event.DocumentListener;
@@ -182,6 +183,8 @@ public class SlangWordCRUD extends JFrame{
             SlangWord editedSlangWord = newDialog.getReturnedValue();
             if(editedSlangWord != null){
                 SlangWordUtils.editWord(oldSlangWord, editedSlangWord);
+                initOriginWordList();
+                createNewWordList(originWordList);
             }
         } else {
             JOptionPane.showMessageDialog(null, "Please choose a word!", "Warning", 
@@ -395,10 +398,23 @@ public class SlangWordCRUD extends JFrame{
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(mainPane, BorderLayout.CENTER);
         getContentPane().add(sidePane, BorderLayout.EAST);
-        setTitle("Slang Word");
+        setTitle("Slang Word Dictionary");
         setSize(750, 400);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int option = JOptionPane.showConfirmDialog(null, 
+                    "Are you sure you want to close Slang Word Dictionary?", "Close Window?", 
+                    JOptionPane.YES_NO_OPTION, 
+                    JOptionPane.QUESTION_MESSAGE);
+                if (option == JOptionPane.YES_OPTION){
+                    SlangWordUtils.saveWordListToJsonFile();
+                    System.exit(0);
+                }
+            }
+        });
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     }
     
     public static void main(String[] args) {
