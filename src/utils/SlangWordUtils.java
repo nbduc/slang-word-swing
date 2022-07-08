@@ -122,7 +122,7 @@ public class SlangWordUtils {
                     while (line != null) {
                         String[] parts = line.split("`");
                         if(parts.length > 1){
-                            String word = parts[0];
+                            String word = parts[0].replaceAll("\\s+", "");
                             String[] defs = parts[1].split("\\| ");
 
                             //set wordListTM
@@ -219,7 +219,7 @@ public class SlangWordUtils {
                 String line;
                 while ((line = br.readLine()) != null) {
                     String[] parts = line.split("`");
-                    if(!parts[0].equals(deletedSlangWord.getWord())){
+                    if(!parts[0].replaceAll("\\s+", "").equals(deletedSlangWord.getWord())){
                         stringBuffer.append(line);
                         stringBuffer.append("\n");
                     } else {
@@ -252,7 +252,7 @@ public class SlangWordUtils {
                 String line;
                 while ((line = br.readLine()) != null) {
                     String[] parts = line.split("`");
-                    if(!parts[0].equals(oldSlangWord.getWord())){
+                    if(!parts[0].replaceAll("\\s+", "").equals(oldSlangWord.getWord())){
                         stringBuffer.append(line);
                         stringBuffer.append("\n");
                     } else {
@@ -406,5 +406,15 @@ public class SlangWordUtils {
         wordListTM = null;
         wordListHM = null;
         loadAllWords();
+    }
+    
+    public static SlangWord randomSlangWord(){
+        Random random = new Random();
+        ArrayList<String> wordList = new ArrayList<>(wordListTM.keySet());
+        String randomWord = wordList.get(random.nextInt(wordList.size()));
+        SlangWord result = new SlangWord();
+        result.setWord(randomWord);
+        result.setDefinitionList(wordListTM.get(randomWord));
+        return result;
     }
 }

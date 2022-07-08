@@ -35,6 +35,9 @@ public class SlangWordCRUD extends JFrame{
     private static JSplitPane mainPane;
     private static JMenu historyMenu;
     private static JPanel sidePane;
+    private static JLabel wordOfTheDayLabel;
+    private static JButton showWordOfTheDayButton;
+    private static JButton randomWordButton;
     private static JPanel leftPane;
     private static JPanel searchPane;
     private static JRadioButton searchByWordRadioButton;
@@ -47,12 +50,14 @@ public class SlangWordCRUD extends JFrame{
     private static JEditorPane definitionEditorPane;
     private static JList wordListContainer;
     private static Collection<SlangWord> originWordList;
+    private static SlangWord randomSlangWord;
     
     public SlangWordCRUD() {
         createAndShowGUI();
         initOriginWordList();
         createNewWordList(originWordList);
         createNewHistoryList();
+        randomNextWord();
     }
     
     private static void initOriginWordList(){
@@ -222,6 +227,11 @@ public class SlangWordCRUD extends JFrame{
             JOptionPane.showMessageDialog(null, "Successfully reset the word list!", "About", 
                             JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+    
+    private void randomNextWord(){
+        randomSlangWord = SlangWordUtils.randomSlangWord();
+        wordOfTheDayLabel.setText(randomSlangWord.getWord());
     }
     
     private void createAndShowGUI() {
@@ -433,6 +443,30 @@ public class SlangWordCRUD extends JFrame{
         
         //set the side pane
         sidePane = new JPanel();
+        sidePane.setLayout(new GridBagLayout());
+        JLabel wordOfTheDayTitleLabel = new JLabel("Word of the Day: ");
+        wordOfTheDayLabel = new JLabel();
+        wordOfTheDayLabel.setFont(new Font("Calibri", Font.PLAIN, 30));
+        showWordOfTheDayButton = new JButton("← About the word");
+        showWordOfTheDayButton.addActionListener((ActionEvent e) -> {
+            definitionEditorPane.setText(SlangWordUtils.convertWordToHtml(randomSlangWord));
+        });
+        randomWordButton = new JButton("Next to another word");
+        randomWordButton.addActionListener((ActionEvent e) -> {
+            randomNextWord();
+        });
+        c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.gridy = 0;
+        c.gridx = 0;
+        sidePane.add(wordOfTheDayTitleLabel, c);
+        c.gridy = 1;
+        sidePane.add(wordOfTheDayLabel, c);
+        c.gridy = 2;
+        c.insets = new Insets(3,0,3,0);
+        sidePane.add(showWordOfTheDayButton, c);
+        c.gridy = 3;
+        sidePane.add(randomWordButton, c);
         sidePane.setPreferredSize(new Dimension(200, -1));
         
         //
