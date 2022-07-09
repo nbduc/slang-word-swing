@@ -231,7 +231,16 @@ public class SlangWordCRUD extends JFrame{
     
     private void randomNextWord(){
         randomSlangWord = SlangWordUtils.randomSlangWord();
-        wordOfTheDayLabel.setText(randomSlangWord.getWord());
+        if(randomSlangWord != null){
+            wordOfTheDayLabel.setText(randomSlangWord.getWord());
+            showWordOfTheDayButton.setEnabled(true);
+            randomWordButton.setEnabled(true);
+        } else {
+            wordOfTheDayLabel.setText("No data");
+            showWordOfTheDayButton.setEnabled(false);
+            randomWordButton.setEnabled(false);
+        }
+        
     }
     
     private void createAndShowGUI() {

@@ -11,6 +11,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.swing.*;
@@ -41,9 +43,14 @@ public class TheWordDialog extends JDialog{
     private void addNewDefinition(){
         DefaultListModel model = (DefaultListModel) definitionList.getModel();
         String newDef = definitionTextField.getText();
-        model.add(defs.size(), newDef);
-        defs.add(newDef);
-        definitionTextField.setText("");
+        if(!"".equals(newDef)){
+            model.add(defs.size(), newDef);
+            defs.add(newDef);
+            definitionTextField.setText("");
+        } else {
+            JOptionPane.showMessageDialog(null, "Please enter a word!", "Warning", 
+                        JOptionPane.WARNING_MESSAGE);
+        }
     }
     
     private void createAndShowGUI(){
@@ -76,6 +83,24 @@ public class TheWordDialog extends JDialog{
                 removeButton.setEnabled(true);
             } else {
                 removeButton.setEnabled(false);
+            }
+        });
+        definitionList.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    // Double-click detected
+                    int index = definitionList.getSelectedIndex();
+                    if (index != -1) {
+                        String oldValue = (String)definitionList.getSelectedValue();
+                        String result = JOptionPane.showInputDialog(null, "Definition:", oldValue);
+                        if(result != null){
+                            model.remove(index);
+                            model.add(index, result);
+                            defs.remove(oldValue);
+                            defs.add(index, result);
+                        }
+                    }
+                }
             }
         });
         definitionList.setPreferredSize(new Dimension(255, -1));
