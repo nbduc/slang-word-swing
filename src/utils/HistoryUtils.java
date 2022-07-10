@@ -8,10 +8,13 @@ package utils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.TreeSet;
 import model.History;
@@ -76,8 +79,8 @@ public class HistoryUtils {
                 historyFile.createNewFile();
             }
             try (PrintWriter pw = new PrintWriter(
-                    new BufferedWriter(
-                            new FileWriter(historyFile, true)))){
+                    new OutputStreamWriter(
+                            new FileOutputStream(historyFile), StandardCharsets.UTF_8))){
                 pw.println(newHistory.convertToCsv());
                 pw.flush();
             }
